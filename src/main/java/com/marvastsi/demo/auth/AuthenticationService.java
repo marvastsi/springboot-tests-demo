@@ -32,7 +32,7 @@ public class AuthenticationService {
 			throw new NotFoundException("Not found register with login: " + username);
 		}
 
-		User user = optUser.get();
+		User user = optUser.get(); 
 		if (bcrypt.matches(login.getPassword(), user.getPassword())) {
 			return Optional.of(new Token(jwtAuthenticator.encode(user.getUsername(), null)));
 		}

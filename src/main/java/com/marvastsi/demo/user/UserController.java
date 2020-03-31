@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.marvastsi.demo.annotation.RestConfig;
 import com.marvastsi.demo.annotation.RoleUser;
+import com.marvastsi.demo.base.GenericController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +31,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestConfig
 @Api(tags = "User")
 @RequestMapping("/user")
-public class UserController {
+public class UserController extends GenericController<User> {
 
 	@Autowired
 	private UserService userService;
@@ -83,7 +84,7 @@ public class UserController {
 	}
 
 	@RoleUser
-	@GetMapping("/{username}")
+	@GetMapping("/{username:.+}")
 	@ApiOperation("Find one User.")
 	public ResponseEntity<?> findOne(@PathVariable("username") String login) {
 		User responseUser = null;
