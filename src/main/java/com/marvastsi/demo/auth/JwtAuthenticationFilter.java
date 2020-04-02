@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
 			throws ServletException, IOException {
 
-		String header = req.getHeader("X-Authorization");
+		String header = req.getHeader("Authorization");
 		String split[] = header != null ? header.split(" ") : new String[0];
 		String token = split.length == 2 ? split[1] : null;
 

@@ -15,7 +15,7 @@ public class UserTemplateLoader implements TemplateLoader {
 
 	@Override
 	public void load() {
-		Fixture.of(User.class).addTemplate("gandalfLogin", new Rule() {
+		Fixture.of(User.class).addTemplate("login", new Rule() {
 			{
 				add("id", "ee000041-0213-439d-ab5c-3ad349606a7c");
 				add("name", "Gandalf");

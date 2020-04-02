@@ -52,7 +52,7 @@ public class SwaggerWebMvcConfigurer implements WebMvcConfigurer {
 	
 	private List<Parameter> globalOperationParameters() {
 		ParameterBuilder parameterToken = new ParameterBuilder();
-		parameterToken.name("X-Authorization")
+		parameterToken.name("Authorization")
 			.description("Bearer authorization token")
 			.modelRef(new ModelRef("string"))
 			.parameterType("header")
