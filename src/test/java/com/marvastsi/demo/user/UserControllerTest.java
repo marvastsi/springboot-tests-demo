@@ -1,6 +1,7 @@
 package com.marvastsi.demo.user;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
@@ -17,41 +18,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import com.marvastsi.demo.SpringbootTestsDemoApplication;
+import com.marvastsi.demo.fixture.functions.PasswordEnconderFunction;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import com.marvastsi.demo.fixture.functions.PasswordEnconderFunction;
 
 import br.com.six2six.fixturefactory.Fixture;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@RunWith(SpringRunner.class)
 public class UserControllerTest extends AbstractControllerTest {
 
 	@SpyBean
 	private UserService userServiceMock;
 	
-	@InjectMocks
+	@Autowired
 	private UserController userController;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		initMocks(this, userController);
 		authenticate();
 	}
 
 	@Test
+	@DisplayName("Should Create an User")
 	public void shouldCreateAnUser() throws Exception {
 		UserCreateDTO dto = new UserCreateDTO();
 		dto.setLogin("Samwise@lordoftherings.com");
@@ -66,30 +66,34 @@ public class UserControllerTest extends AbstractControllerTest {
 		
 		this.mockMvc.perform(
 				 post("/api/user")
-				.headers(makeHeaders(token.getToken()))
-				.content(mapToJson(dto)))
+				 .accept(MediaType.APPLICATION_JSON)
+				.headers(makeHeaders())
+				.content(mapToJson(dto))
+				.contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)))
-				.andExpect(content().json(mapToJson(expected)));
+				.andExpect(jsonPath("$.id").value(notNullValue()))
+                .andExpect(jsonPath("$.login").value(expected.getLogin()))
+				.andExpect(jsonPath("$.name").value(expected.getName()))
+				.andExpect(jsonPath("$.active").value(expected.isActive()));
 		
 		verify(userServiceMock, times(1)).findByLogin(expected.getLogin());
         verifyNoMoreInteractions(userServiceMock);
 	}
 	
 	@Test
+	@DisplayName("Should Return a Single User With Given Login")
 	public void shouldReturnUserWithGivenLogin() throws Exception {
 		User expected = Fixture.from(User.class).gimme("valid");
 		when(userServiceMock.findByLogin(expected.getLogin())).thenReturn(Optional.of(expected));
 		
 		this.mockMvc.perform(
 				 get("/api/user/{username}", expected.getLogin())
-				.headers(makeHeaders(token.getToken())))
+				.headers(makeHeaders()))
 				.andDo(print())
 				.andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(1)))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(1)))
 				.andExpect(content().json(mapToJson(expected)));
 		
 		verify(userServiceMock, atLeastOnce()).findByLogin(expected.getLogin());
@@ -97,13 +101,14 @@ public class UserControllerTest extends AbstractControllerTest {
 	}
 	
 	@Test
+	@DisplayName("Should Return List of All Users")
 	public void shouldReturnAllUsers() throws Exception {
 		List<User> expected = Fixture.from(User.class).gimme(2, "valid");
 		when(userServiceMock.findAll()).thenReturn(expected);
 		
 		this.mockMvc.perform(
 				get("/api/user")
-				.headers(makeHeaders(token.getToken())))
+				.headers(makeHeaders()))
 				.andDo(print())
 				.andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
