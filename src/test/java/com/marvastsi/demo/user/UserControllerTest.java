@@ -18,8 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Optional;
 
-import com.marvastsi.demo.SpringbootTestsDemoApplication;
-import com.marvastsi.demo.fixture.functions.PasswordEnconderFunction;
+import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,10 +31,15 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.marvastsi.demo.SpringbootTestsDemoApplication;
+import com.marvastsi.demo.fixture.functions.PasswordEnconderFunction;
+
 import br.com.six2six.fixturefactory.Fixture;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@Transactional
 @AutoConfigureMockMvc
+@SpringBootTest(classes = { SpringbootTestsDemoApplication.class})
+//		UserController.class }, webEnvironment = WebEnvironment.DEFINED_PORT)
 public class UserControllerTest extends AbstractControllerTest {
 
 	@SpyBean
@@ -117,10 +121,10 @@ public class UserControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$[0].login", is(expected.get(0).getLogin())))
 				.andExpect(jsonPath("$[0].name", is(expected.get(0).getName())))
 				.andExpect(jsonPath("$[0].active", is(expected.get(0).isActive())))
-				.andExpect(jsonPath("$[1].id", is(expected.get(0).getId())))
-				.andExpect(jsonPath("$[1].login", is(expected.get(0).getLogin())))
-				.andExpect(jsonPath("$[1].name", is(expected.get(0).getName())))
-				.andExpect(jsonPath("$[1].active", is(expected.get(0).isActive())));
+				.andExpect(jsonPath("$[1].id", is(expected.get(1).getId())))
+				.andExpect(jsonPath("$[1].login", is(expected.get(1).getLogin())))
+				.andExpect(jsonPath("$[1].name", is(expected.get(1).getName())))
+				.andExpect(jsonPath("$[1].active", is(expected.get(1).isActive())));
 		
 		verify(userServiceMock, times(1)).findAll();
         verifyNoMoreInteractions(userServiceMock);
